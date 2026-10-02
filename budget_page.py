@@ -6,37 +6,23 @@ st.title('Budget Planner')
 
 budget_data = dl.load_budget_data()
 
-if 'will_add' not in st.session_state:
-    st.session_state.will_add = False
-if 'will_edit' not in st.session_state:
-    st.session_state.will_edit = False
-if 'will_del' not in st.session_state:
-    st.session_state.will_del = False
+if 'notification' in st.session_state:
+    st.toast(st.session_state.notification)
+    del st.session_state.notification
 
 def sort_budget_data():
     pass
 
-def go_to_add():
-    st.session_state.will_add = True
-    st.session_state.will_edit = False
-    st.session_state.will_del = False
-
-def go_to_edit():
-    st.session_state.will_edit = True
-    st.session_state.will_add = False
-    st.session_state.will_del = False
-
-def go_to_del():
-    st.session_state.will_del = True
-    st.session_state.will_edit = False
-    st.session_state.will_add = False
-
-def save_budget():
-    st.session_state.will_add = False
-    st.session_state.will_edit = False
-    st.session_state.will_del = False
-
-    budget_data.append(st.session_state.new_budget)
+def save_budget(action):
+    if action == 'Add':
+        if type(st.session_state.new_budget) == list: 
+            budget_data.extend(st.session_state.new_budget)
+        elif type(st.session_state.new_budget) == dict:
+            budget_data.append(st.session_state.new_budget)
+    elif action == 'Edit':
+        pass
+    elif action == 'Delete':
+        pass
     dl.save_budget_data(budget_data)
 
 def show_budget_data():
@@ -52,12 +38,14 @@ def show_budget_data():
 def customization_buttons():
     col1, col2, col3, col4 = st.columns([1,1,1,2])
     with col1:
-        st.button('Add Budget', on_click=go_to_add)
+        if st.button('Add Budget'):
+            add_budget_data()
     with col2:
-        st.button('Edit a Budget', on_click=go_to_edit)
+        st.button('Edit a Budget')
     with col3:
-        st.button('Delete a Budget', on_click=go_to_del)
+        st.button('Delete a Budget')
 
+@st.dialog('Add a Budget')
 def add_budget_data():
     curr_year = datetime.datetime.now().year
     curr_month = datetime.datetime.now().month
@@ -65,39 +53,85 @@ def add_budget_data():
     years = list(range(curr_year, curr_year + 6))
     year = st.selectbox('Select Year', years)
 
-    months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+    months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+        ]
     month = st.selectbox('Select Month', months)
 
     income_sources = list({budg['income_source'] for budg in budget_data})
-    income_source = st.selectbox('Income Source', income_sources + ['Other'])
-    if income_source == 'Other':
-        income_source = st.text_input('If Other Income Source')
+    income_source = st.selectbox(
+        'Income Source',
+        income_sources,
+        accept_new_options=True
+        )
 
-    income = st.text_input('Income')
-    if not income.isdigit():
-        st.warning('Please enter a positive integer.')
-    else: income = int(income)
+    income = st.number_input(
+        'Income',
+        value=0.0,
+        step=100.0,
+        format='%.1f')
 
     categories = list({budg['category'] for budg in budget_data})
-    category = st.selectbox('Category', categories + ['Other'])
-    if category == 'Other':
-        category = st.text_input('If Other Category:')
+    selected_categories = st.multiselect(
+        'Select Categories',
+        categories,
+        accept_new_options=True
+        )
 
-    planned_amount = st.text_input('Planned Amount')
-    if not planned_amount.isdigit():
-        st.warning('Please enter a positive integer')
-    else: planned_amount = int(planned_amount)
+    if len(selected_categories) > 1:
+        planned_amounts = []
+        for category in selected_categories:
+            planned_amount = st.number_input(
+                f'Planned Amount on {category}',
+                value=0.0,
+                step=100.0,
+                format='%.1f'
+                )
+            planned_amounts.append(planned_amount)
+    elif len(selected_categories) == 1:
+        category = selected_categories[0]
+        planned_amount = st.number_input(
+            f'Planned Amount on {category}',
+            value=0.0,
+            step=100.0,
+            format='%.1f'
+            )
 
-    st.session_state.new_budget = {
-        'month': f'{month} {year}',
-        'income_source': income_source,
-        'income': income,
-        'category': category,
-        'planned_amount': planned_amount
-    }
-    print(st.session_state.added_budget)
-    if type(income) == int and type(planned_amount) == int:
-        st.button('Add', on_click=save_budget)
+    if len(selected_categories) > 1:
+        st.session_state.new_budget = []
+        for i, category in enumerate(selected_categories):
+            new_budget = {
+                'month': f'{month} {year}',
+                'income_source': income_source,
+                'income': income,
+                'category': category,
+                'planned_amount': planned_amounts[i]
+            }
+            st.session_state.new_budget.append(new_budget)
+    elif len(selected_categories) == 1:
+        st.session_state.new_budget = {
+            'month': f'{month} {year}',
+            'income_source': income_source,
+            'income': income,
+            'category': category,
+            'planned_amount': planned_amount
+        }
+    
+    if st.button('Add'):
+        save_budget('Add')
+        st.session_state.notification = 'Budget added successfully!'
+        st.rerun()
 
 def edit_budget_data():
     pass
@@ -105,12 +139,7 @@ def edit_budget_data():
 def del_budget_data():
     pass
 
+st.subheader('Actions:')
 customization_buttons()
-if st.session_state.will_add:
-    add_budget_data()
-elif st.session_state.will_edit:
-    edit_budget_data()
-elif st.session_state.will_del:
-    del_budget_data()
-else:
-    show_budget_data()
+st.subheader('Allocated Budget')
+show_budget_data()
