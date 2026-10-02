@@ -36,14 +36,14 @@ def sort_budget_data(budget):
     budget.sort(key=lambda x: MONTHS.index(x['month'].split()[0]))
     budget.sort(key=lambda x: x['month'].split()[1])
 
-def save_budget(action):
+def save_budget(action, *, edit_start_i=None, edit_stop_i=None):
     if action == 'Add':
         if type(st.session_state.new_budget) == list: 
             budget_data.extend(st.session_state.new_budget)
         elif type(st.session_state.new_budget) == dict:
             budget_data.append(st.session_state.new_budget)
     elif action == 'Edit':
-        pass
+        budget_data[edit_start_i: edit_stop_i + 1] = st.session_state.edited_budget
     sort_budget_data(budget_data)
     dl.save_budget_data(budget_data)
 
@@ -130,9 +130,59 @@ def add_budget_data():
         st.session_state.notification = 'Budget added successfully!'
         st.rerun()
 
-@st.dialog('Edit Budget')
+@st.dialog('Edit Budget', width='medium')
 def edit_budget_data():
-    pass
+    years = list({budg['month'].split()[1] for budg in budget_data})
+    year = st.selectbox(
+        'Select Year',
+        options=years,
+    )
+
+    to_edit_data = []
+    for budg in budget_data:
+        if budg['month'].split()[1] == year:
+            to_edit_data.append(budg)
+
+    st.session_state.edited_budget = st.data_editor(
+        to_edit_data, 
+        column_config={
+            'month': st.column_config.SelectboxColumn(
+                'Month',
+                options=[f'{month} {year}' for month in MONTHS],
+                required=True
+            ),
+            'income_source': st.column_config.TextColumn(
+                'Income Source',
+                required=True
+            ),
+            'income': st.column_config.NumberColumn(
+                'Income',
+                format='%.1f',
+                step=100.0,
+                required=True
+            ),
+            'category': st.column_config.TextColumn(
+                'Category',
+                required=True
+            ),
+            'planned_amount': st.column_config.NumberColumn(
+                'Planned Amount',
+                format='%.1f',
+                step=100.0,
+                required=True
+            )
+        },
+        num_rows='delete'
+    )
+    print(st.session_state.edited_budget)
+
+    start_index = budget_data.index(to_edit_data[0])
+    stop_index = budget_data.index(to_edit_data[-1])
+    
+    if st.button('Save'):
+        save_budget('Edit', edit_start_i=start_index, edit_stop_i=stop_index)
+        st.session_state.notification = 'Budget edited successfully!'
+        st.rerun()
 
 st.subheader('Actions:')
 customization_buttons()
