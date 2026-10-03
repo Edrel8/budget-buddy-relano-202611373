@@ -10,7 +10,7 @@ COLUMN_NAMES = {
         'income_source':'Income Source',
         'income':'Income',
         'category':'Category',
-        'planned_amount':'Planned Amount',
+        'planned_amount':'Planned Expenses',
         'unallocated': 'Unallocated Amount'
     }
 MONTHS = [
@@ -37,6 +37,21 @@ def sort_budget_data(budget):
     budget.sort(key=lambda x: MONTHS.index(x['month'].split()[0]))
     budget.sort(key=lambda x: x['month'].split()[1])
 
+def filter_by_current_month(month, year):
+    month_year = f'{month} {year}'
+    filtered_data = []
+    for budg in budget_data:
+        if (budg['month'] == month_year) and (budg not in filtered_data):
+            filtered_data.append(budg)
+    return filtered_data
+
+def filter_by_income_source(income_source):
+    filtered_data = []
+    for budg in budget_data:
+        if (budg['income_source'] == income_source) and (budg not in filtered_data):
+            filtered_data.append(budg)
+    return filtered_data
+
 def save_budget(action, *, edit_start_i=None, edit_stop_i=None):
     if action == 'Add':
         budget_data.extend(st.session_state.new_budget)
@@ -62,11 +77,14 @@ def add_budget_data():
     allow_submission=False
 
     years = list(range(CURR_YEAR - 5, CURR_YEAR + 6))
-    year = st.selectbox('Select Year', years)
+    year = st.selectbox('Select Year', years, index=5)
 
     month = st.selectbox('Select Month', MONTHS)
 
-    income_sources = list({budg['income_source'] for budg in budget_data})
+    curr_month_budget = filter_by_current_month(month, year)
+
+    income_sources = list({budg['income_source'] for budg in curr_month_budget})
+
     income_source = st.selectbox(
         'Income Source',
         income_sources,
