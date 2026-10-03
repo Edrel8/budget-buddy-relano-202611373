@@ -37,7 +37,7 @@ def sort_budget_data(budget):
     budget.sort(key=lambda x: MONTHS.index(x['month'].split()[0]))
     budget.sort(key=lambda x: x['month'].split()[1])
 
-def filter_by_current_month(month, year):
+def filter_by_month(month, year,*,budget_data=budget_data):
     month_year = f'{month} {year}'
     filtered_data = []
     for budg in budget_data:
@@ -45,7 +45,7 @@ def filter_by_current_month(month, year):
             filtered_data.append(budg)
     return filtered_data
 
-def filter_by_income_source(income_source):
+def filter_by_income_source(income_source,*,budget_data=budget_data):
     filtered_data = []
     for budg in budget_data:
         if (budg['income_source'] == income_source) and (budg not in filtered_data):
@@ -81,7 +81,7 @@ def add_budget_data():
 
     month = st.selectbox('Select Month', MONTHS)
 
-    curr_month_budget = filter_by_current_month(month, year)
+    curr_month_budget = filter_by_month(month, year)
 
     income_sources = list({budg['income_source'] for budg in curr_month_budget})
 
@@ -91,11 +91,23 @@ def add_budget_data():
         accept_new_options=True
         )
 
-    income = st.number_input(
-        'Income',
-        value=0.0,
-        step=100.0,
-        format='%.1f')
+    source_budget = filter_by_income_source(income_source)
+
+    if income_source not in income_sources:
+        income = st.number_input(
+            'Income',
+            value=0.0,
+            step=100.0,
+            format='%.1f'
+            )
+    else:
+        income = st.number_input(
+            'Income',
+            value=source_budget[0]['income'],
+            step=100.0,
+            format='%.1f',
+            disabled=True
+            )
 
     categories = list({budg['category'] for budg in budget_data})
     selected_categories = st.multiselect(
@@ -137,11 +149,13 @@ def add_budget_data():
 
 @st.dialog('Edit Budget', width='medium', on_dismiss='rerun')
 def edit_budget_data():
+    allow_submission = True
+
     years = list({budg['month'].split()[1] for budg in budget_data})
     year = st.selectbox(
         'Select Year',
         options=years,
-    )
+        )
 
     to_edit_data = []
     for budg in budget_data:
@@ -180,16 +194,45 @@ def edit_budget_data():
         num_rows='delete'
     )
 
+    unique_incomes = set()
+    month_list = list({budg['month'] for budg in st.session_state.edited_budget})
+    for month in month_list:
+        monthly_budget_data = filter_by_month(
+            *month.split(),
+            budget_data=st.session_state.edited_budget
+            )
+        for month_budg in monthly_budget_data:
+            income_source = month_budg['income_source']
+            source_budget_data = filter_by_income_source(
+                income_source,
+                budget_data=monthly_budget_data
+                )
+            for source_budg in source_budget_data:
+                unique_incomes.add(source_budg['income'])
+            if len(unique_incomes) > 1:
+                    allow_submission = False
+                    break
+            unique_incomes.clear()
+
     start_index = budget_data.index(to_edit_data[0])
     stop_index = budget_data.index(to_edit_data[-1])
-    
-    if st.button('Save'):
-        save_budget('Edit', edit_start_i=start_index, edit_stop_i=stop_index)
-        st.session_state.notification = 'Budget edited successfully!'
-        st.rerun()
+
+    if allow_submission == True:
+        if st.button('Save'):
+            save_budget('Edit', edit_start_i=start_index, edit_stop_i=stop_index)
+            st.session_state.notification = 'Budget edited successfully!'
+            st.rerun()
+    else: st.warning('Incomes from same sources must be equal.')
 
 def calc_income_per_source():
-    budg_sources = [{'month':budg['month'],'income_source':budg['income_source'], 'income':budg['income']} for budg in budget_data]
+    budg_sources = [
+        {
+        'month':budg['month'],
+        'income_source':budg['income_source'],
+        'income':budg['income']
+        }
+        for budg in budget_data
+        ]
     
     income_per_source = []
     for row in budg_sources:
@@ -199,7 +242,14 @@ def calc_income_per_source():
     return income_per_source
 
 def calc_planned_expenses_per_source():
-    budg_sources = [{'month':budg['month'],'income_source':budg['income_source'],'planned_amount':budg['planned_amount']} for budg in budget_data]
+    budg_sources = [
+        {
+        'month':budg['month'],
+        'income_source':budg['income_source'],
+        'planned_amount':budg['planned_amount']
+        }
+        for budg in budget_data
+        ]
     
     planned_expenses_per_source = []
     for row in budg_sources:
@@ -218,6 +268,7 @@ def calc_unallocated_budget():
     unallocated_budgets = []
     for i, row in enumerate(income):
         unallocated = row['income'] - planned_expenses[i]['planned_amount']
+        if unallocated <= 0: continue
         unallocated_per_source = {
             'month': row['month'],
             'income_source': row['income_source'],
@@ -226,6 +277,7 @@ def calc_unallocated_budget():
         unallocated_budgets.append(unallocated_per_source)
     
     st.session_state.unallocated_budgets = unallocated_budgets
+
 
 st.subheader('Actions:')
 customization_buttons()
