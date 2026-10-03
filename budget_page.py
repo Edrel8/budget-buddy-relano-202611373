@@ -11,7 +11,8 @@ COLUMN_NAMES = {
         'income':'Income',
         'category':'Category',
         'planned_amount':'Planned Expenses',
-        'unallocated': 'Unallocated Amount'
+        'unallocated': 'Unallocated Amount',
+        'exceeded': 'Exceeded Amount'
     }
 MONTHS = [
     'January',
@@ -282,12 +283,39 @@ def calc_unallocated_budget():
     
     st.session_state.unallocated_budgets = unallocated_budgets
 
+def check_exceed_planned_expenses():
+    income = calc_income_per_source()
+    planned_expenses = calc_planned_expenses_per_source()
+
+    exceeded_budgets = []
+    for i, row in enumerate(income):
+        exceeded = planned_expenses[i]['planned_amount'] - row['income']
+        if exceeded <= 0: continue
+        exceeded_per_source = {
+            'month': row['month'],
+            'income_source': row['income_source'],
+            'exceeded': exceeded
+        }
+        exceeded_budgets.append(exceeded_per_source)
+
+    if len(exceeded_budgets) > 0:
+        st.session_state.exceeded_planned_expenses = exceeded_budgets
+        st.session_state.there_exceeds = True
+        st.warning('Your planned expenses exceed your income.')
+    else:
+        st.session_state.there_exceeds = False
 
 st.subheader('Actions:')
 customization_buttons()
 
+check_exceed_planned_expenses()
+
 st.subheader('Allocated Budget')
 show_budget_data(budget_data)
+
+if st.session_state.there_exceeds:
+    st.subheader('Exceeded Planned Expenses')
+    show_budget_data(st.session_state.exceeded_planned_expenses)
 
 st.subheader('Unallocated Budget')
 calc_unallocated_budget()
