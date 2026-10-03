@@ -38,10 +38,7 @@ def sort_budget_data(budget):
 
 def save_budget(action, *, edit_start_i=None, edit_stop_i=None):
     if action == 'Add':
-        if type(st.session_state.new_budget) == list: 
-            budget_data.extend(st.session_state.new_budget)
-        elif type(st.session_state.new_budget) == dict:
-            budget_data.append(st.session_state.new_budget)
+        budget_data.extend(st.session_state.new_budget)
     elif action == 'Edit':
         budget_data[edit_start_i: edit_stop_i + 1] = st.session_state.edited_budget
     sort_budget_data(budget_data)
@@ -56,11 +53,13 @@ def customization_buttons():
         if st.button('Add Budget'):
             add_budget_data()
     with col2:
-        if st.button('Edit a Budget'):
+        if st.button('Edit Budget'):
             edit_budget_data()
 
-@st.dialog('Add a Budget')
+@st.dialog('Add Budget')
 def add_budget_data():
+    allow_submission=False
+
     years = list(range(CURR_YEAR - 5, CURR_YEAR + 6))
     year = st.selectbox('Select Year', years)
 
@@ -86,7 +85,7 @@ def add_budget_data():
         accept_new_options=True
         )
 
-    if len(selected_categories) > 1:
+    if len(selected_categories) > 0:
         planned_amounts = []
         for category in selected_categories:
             planned_amount = st.number_input(
@@ -96,16 +95,8 @@ def add_budget_data():
                 format='%.1f'
                 )
             planned_amounts.append(planned_amount)
-    elif len(selected_categories) == 1:
-        category = selected_categories[0]
-        planned_amount = st.number_input(
-            f'Planned Amount on {category}',
-            value=0.0,
-            step=100.0,
-            format='%.1f'
-            )
 
-    if len(selected_categories) > 1:
+    if len(selected_categories) > 0:
         st.session_state.new_budget = []
         for i, category in enumerate(selected_categories):
             new_budget = {
@@ -116,21 +107,16 @@ def add_budget_data():
                 'planned_amount': planned_amounts[i]
             }
             st.session_state.new_budget.append(new_budget)
-    elif len(selected_categories) == 1:
-        st.session_state.new_budget = {
-            'month': f'{month} {year}',
-            'income_source': income_source,
-            'income': income,
-            'category': category,
-            'planned_amount': planned_amount
-        }
+            allow_submission = True
+    else: st.warning('Please select at least one category.')
     
-    if st.button('Add'):
-        save_budget('Add')
-        st.session_state.notification = 'Budget added successfully!'
-        st.rerun()
+    if allow_submission:
+        if st.button('Add'):
+            save_budget('Add')
+            st.session_state.notification = 'Budget added successfully!'
+            st.rerun()
 
-@st.dialog('Edit Budget', width='medium')
+@st.dialog('Edit Budget', width='medium', on_dismiss='rerun')
 def edit_budget_data():
     years = list({budg['month'].split()[1] for budg in budget_data})
     year = st.selectbox(
