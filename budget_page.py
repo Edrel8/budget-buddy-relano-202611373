@@ -96,6 +96,7 @@ def add_budget_data():
     if income_source not in income_sources:
         income = st.number_input(
             'Income',
+            min_value=0.0,
             value=0.0,
             step=100.0,
             format='%.1f'
@@ -103,6 +104,7 @@ def add_budget_data():
     else:
         income = st.number_input(
             'Income',
+            min_value=0.0,
             value=source_budget[0]['income'],
             step=100.0,
             format='%.1f',
@@ -177,6 +179,7 @@ def edit_budget_data():
             'income': st.column_config.NumberColumn(
                 'Income',
                 format='%.1f',
+                min_value=0.0,
                 step=100.0,
                 required=True
             ),
@@ -187,6 +190,7 @@ def edit_budget_data():
             'planned_amount': st.column_config.NumberColumn(
                 'Planned Amount',
                 format='%.1f',
+                min_value=0.0,
                 step=100.0,
                 required=True
             )
