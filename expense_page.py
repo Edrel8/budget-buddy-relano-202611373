@@ -21,12 +21,13 @@ if 'notification' in st.session_state:
 def sort_expense_history(data):
     data.sort(key=lambda x: x['date'])
 
-def save_expense_history(action):
+def save_expense_history(action,*, index=None):
     sort_expense_history(expense_data)
     if action == 'Add':
         dl.add_expense(st.session_state.expense_entry)
-    if action == 'Edit':
-        pass
+    elif action == 'Edit':
+        expense_data[index] = st.session_state.edited_entry
+        dl.save_expense_data(expense_data)
 
 def show_expense_data():
     st.dataframe(expense_data, column_config=COLUMN_NAMES)
@@ -38,7 +39,7 @@ def customization_buttons():
             add_expense_entry()
     with col2:
         if st.button('Edit Expense History'):
-            edit_expense_data()
+            edit_expense_history()
 
 @st.dialog('Add an Expense Entry')
 def add_expense_entry():
@@ -46,7 +47,6 @@ def add_expense_entry():
 
     date = st.date_input(
         'Input Date',
-        max_value=datetime.date.today()
         )
 
     month = st.text_input(
@@ -68,6 +68,7 @@ def add_expense_entry():
     amount = st.number_input(
         'Amount of Expense',
         min_value=0.0,
+        step=100.0,
         format='%.1f'
     )
 
@@ -87,8 +88,58 @@ def add_expense_entry():
     else: st.warning('Do not leave anything blank.')
 
 @st.dialog('Edit Expense History')
-def edit_expense_data():
-    pass
+def edit_expense_history():
+    index = st.number_input(
+        'Select Index to Edit',
+        min_value=0,
+        max_value=len(expense_data) - 1,
+    )
+
+    date = st.date_input(
+        'Input Date',
+        value=expense_data[index]['date']
+        )
+
+    month = st.text_input(
+        'Month',
+        value=datetime.date.strftime(date, '%B %Y'),
+        disabled=True
+        )
+
+    categories = list({budg['category'] for budg in BUDGET_DATA})
+    category = st.selectbox(
+        'Select Category',
+        categories,
+        index=categories.index(expense_data[index]['category'])
+    )
+
+    description = st.text_input(
+        'Description',
+        value=expense_data[index]['description']
+    )
+
+    amount = st.number_input(
+        'Amount of Expense',
+        min_value=0.0,
+        value=expense_data[index]['amount'],
+        step=100.0,
+        format='%.1f'
+    )
+    
+    st.session_state.edited_entry = {
+        'date': date,
+        'month': month,
+        'category': category,
+        'description': description,
+        'amount': amount
+    }
+
+    if date and category and description and amount:
+        if st.button('Save Edits'):
+            save_expense_history('Edit', index=index)
+            st.session_state.notification = 'Expense entry successfully edited!'
+            st.rerun()
+    else: st.warning('Do not leave anything blank.')
 
 st.subheader('Actions:')
 customization_buttons()
