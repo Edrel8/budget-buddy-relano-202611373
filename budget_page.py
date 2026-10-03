@@ -10,7 +10,8 @@ COLUMN_NAMES = {
         'income_source':'Income Source',
         'income':'Income',
         'category':'Category',
-        'planned_amount':'Planned Amount'
+        'planned_amount':'Planned Amount',
+        'unallocated': 'Unallocated Amount'
     }
 MONTHS = [
     'January',
@@ -160,7 +161,6 @@ def edit_budget_data():
         },
         num_rows='delete'
     )
-    print(st.session_state.edited_budget)
 
     start_index = budget_data.index(to_edit_data[0])
     stop_index = budget_data.index(to_edit_data[-1])
@@ -170,7 +170,51 @@ def edit_budget_data():
         st.session_state.notification = 'Budget edited successfully!'
         st.rerun()
 
+def calc_income_per_source():
+    budg_sources = [{'month':budg['month'],'income_source':budg['income_source'], 'income':budg['income']} for budg in budget_data]
+    
+    income_per_source = []
+    for row in budg_sources:
+        if row not in income_per_source:
+            income_per_source.append(row)
+
+    return income_per_source
+
+def calc_planned_expenses_per_source():
+    budg_sources = [{'month':budg['month'],'income_source':budg['income_source'],'planned_amount':budg['planned_amount']} for budg in budget_data]
+    
+    planned_expenses_per_source = []
+    for row in budg_sources:
+        for i, planned_expense in enumerate(planned_expenses_per_source):
+            if planned_expense['month'] == row['month'] and planned_expense['income_source'] == row['income_source']:
+                planned_expenses_per_source[i]['planned_amount'] += row['planned_amount']
+                break
+        else: planned_expenses_per_source.append(row)
+    
+    return planned_expenses_per_source
+    
+def calc_unallocated_budget():
+    income = calc_income_per_source()
+    planned_expenses = calc_planned_expenses_per_source()
+    
+    unallocated_budgets = []
+    for i, row in enumerate(income):
+        unallocated = row['income'] - planned_expenses[i]['planned_amount']
+        unallocated_per_source = {
+            'month': row['month'],
+            'income_source': row['income_source'],
+            'unallocated': unallocated
+        }
+        unallocated_budgets.append(unallocated_per_source)
+    
+    st.session_state.unallocated_budgets = unallocated_budgets
+
 st.subheader('Actions:')
 customization_buttons()
+
 st.subheader('Allocated Budget')
 show_budget_data(budget_data)
+
+st.subheader('Unallocated Budget')
+calc_unallocated_budget()
+show_budget_data(st.session_state.unallocated_budgets)
