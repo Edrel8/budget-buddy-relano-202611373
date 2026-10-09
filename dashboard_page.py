@@ -15,17 +15,35 @@ def select_month():
     )
     st.session_state.month = month
 
-def budget_categ_pie():
+def filter_by_month():
+    st.session_state.month_budget = [
+        budg for budg in budget_data
+        if budg['month'] == st.session_state.month
+    ]
+    st.session_state.month_expense = [
+        exp for exp in expense_data
+        if exp['month'] == st.session_state.month
+    ]
+
+def display_month_summary():
+    pass
+
+def budget_categ_pie(budget_data):
     categ_amounts = {}
     for budg in budget_data:
-        if st.session_state.month == budg['month']:
-            if budg['category'] not in categ_amounts:
-                categ_amounts[budg['category']] = budg['planned_amount']
-            else:
-                categ_amounts[budg['category']] += budg['planned_amount']
+        if budg['category'] not in categ_amounts:
+            categ_amounts[budg['category']] = budg['planned_amount']
+        else:
+            categ_amounts[budg['category']] += budg['planned_amount']
     amounts = categ_amounts.values()
     categories = categ_amounts.keys()
     fig1, ax1 = plt.subplots()
+    ax1.set_title(
+        'Budget Distribution',
+        fontsize='14',
+        fontweight='bold',
+        color='white'
+        )
     fig1.patch.set_alpha(0.0)
     budg_pie = ax1.pie(
         amounts,
@@ -37,4 +55,5 @@ def budget_categ_pie():
     
 
 select_month()
-budget_categ_pie()
+filter_by_month()
+budget_categ_pie(st.session_state.month_budget)
