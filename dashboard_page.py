@@ -25,19 +25,59 @@ def filter_by_month():
         if exp['month'] == st.session_state.month
     ]
 
-def display_month_summary():
-    pass
+def display_month_summary(budg_data, exp_data):
+    incomes = {}
+    for budg in budg_data:
+        if budg['income_source'] not in incomes:
+            incomes[budg['income_source']] = budg['income']
+    total_income = sum(incomes.values())
 
-def budget_categ_pie(budget_data):
+    planned_expenses = [
+        budg['planned_amount']
+        for budg in budg_data
+    ]
+    total_planned_expenses = sum(planned_expenses)
+
+    actual_expenses = [
+        exp['amount']
+        for exp in exp_data
+    ]
+    total_expenses = sum(actual_expenses)
+
+    money_remaining = total_income - total_expenses
+
+    month_summary = {
+        'Total Income': total_income,
+        'Total Planned Expenses': total_planned_expenses,
+        'Total Expenses': total_expenses,
+        'Money Remainig': money_remaining
+    }
+
+    st.subheader('This Month\'s Summary')
+    st.dataframe(
+        month_summary,
+        width=250,
+        column_config={'value': 'Amount'}
+        )
+
+    if money_remaining < 0:
+        st.warning('Expenses exceeds income')
+
+
+
+def budget_categ_pie(budg_data):
     categ_amounts = {}
-    for budg in budget_data:
+    for budg in budg_data:
         if budg['category'] not in categ_amounts:
             categ_amounts[budg['category']] = budg['planned_amount']
         else:
             categ_amounts[budg['category']] += budg['planned_amount']
+    
     amounts = categ_amounts.values()
     categories = categ_amounts.keys()
+    
     fig1, ax1 = plt.subplots()
+    
     ax1.set_title(
         'Budget Distribution',
         fontsize='14',
@@ -45,15 +85,18 @@ def budget_categ_pie(budget_data):
         color='white'
         )
     fig1.patch.set_alpha(0.0)
+    
     budg_pie = ax1.pie(
         amounts,
         labels=categories,
         textprops={'color': 'white'}
         )
     ax1.pie_label(budg_pie, amounts)
+    
     st.pyplot(fig1)
     
 
 select_month()
 filter_by_month()
+display_month_summary(st.session_state.month_budget, st.session_state.month_expense)
 budget_categ_pie(st.session_state.month_budget)
