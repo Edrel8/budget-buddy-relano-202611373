@@ -165,9 +165,19 @@ def edit_budget_data():
         options=years,
         )
 
+    months = list({
+        budg['month'].split()[0]
+        for budg in budget_data
+        if budg['month'].split()[1] == year
+    })
+    month = st.selectbox(
+        'Select Month',
+        options=months
+    )
+
     to_edit_data = []
     for budg in budget_data:
-        if budg['month'].split()[1] == year:
+        if budg['month'] == f'{month} {year}':
             to_edit_data.append(budg)
 
     st.session_state.edited_budget = st.data_editor(
