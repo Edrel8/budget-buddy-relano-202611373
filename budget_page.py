@@ -53,11 +53,13 @@ def filter_by_income_source(income_source,*,budget_data=budget_data):
             filtered_data.append(budg)
     return filtered_data
 
-def save_budget(action, *, edit_start_i=None, edit_stop_i=None):
+def save_budget(action, *, edit_start_i=None, edit_stop_i=None, delete_index=None):
     if action == 'Add':
         budget_data.extend(st.session_state.new_budget)
     elif action == 'Edit':
         budget_data[edit_start_i: edit_stop_i + 1] = st.session_state.edited_budget
+    elif action == 'Delete':
+        budget_data.pop(delete_index)
     sort_budget_data(budget_data)
     dl.save_budget_data(budget_data)
 
@@ -65,13 +67,16 @@ def show_budget_data(budget_data):
     st.dataframe(budget_data, column_config=COLUMN_NAMES)
 
 def customization_buttons():
-    col1, col2, col3 = st.columns([1,1,3])
+    col1, col2, col3, col4 = st.columns([1,1,1,2])
     with col1:
         if st.button('Add Budget'):
             add_budget_data()
     with col2:
         if st.button('Edit Budget'):
             edit_budget_data()
+    with col3:
+        if st.button('Delete Budget'):
+            delete_budget_data()
 
 @st.dialog('Add Budget')
 def add_budget_data():
@@ -196,7 +201,7 @@ def edit_budget_data():
                 required=True
             )
         },
-        num_rows='delete'
+        num_rows='fixed'
     )
 
     unique_incomes = set()
@@ -228,6 +233,49 @@ def edit_budget_data():
             st.session_state.notification = 'Budget edited successfully!'
             st.rerun()
     else: st.warning('Incomes from same sources must be equal.')
+
+@st.dialog('Delete a Budget')
+def delete_budget_data():
+    index = st.slider(
+        'Select an Index to Delete',
+        min_value=0,
+        max_value=len(budget_data) - 1
+    )
+
+    month = st.text_input(
+        'Month',
+        value=budget_data[index]['month'],
+        disabled=True
+    )
+
+    income_source = st.text_input(
+        'Income Source',
+        value=budget_data[index]['income_source'],
+        disabled=True
+    )
+
+    income = st.number_input(
+        'Income',
+        value=budget_data[index]['income'],
+        disabled=True
+    )
+
+    category = st.text_input(
+        'Category',
+        value=budget_data[index]['category'],
+        disabled=True
+    )
+
+    planned_amount = st.number_input(
+        'Planned Expense',
+        value=budget_data[index]['planned_amount'],
+        disabled=True
+    )
+
+    if st.button('Delete'):
+        save_budget('Delete', delete_index=index)
+        st.session_state.notification = 'Budget deleted successfully!'
+        st.rerun()
 
 def calc_income_per_source():
     budg_sources = [
