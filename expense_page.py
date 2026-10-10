@@ -95,7 +95,7 @@ def add_expense_entry():
 
 @st.dialog('Edit Expense History')
 def edit_expense_history():
-    index = st.number_input(
+    index = st.slider(
         'Select Index to Edit',
         min_value=0,
         max_value=len(expense_data) - 1,
@@ -149,8 +149,8 @@ def edit_expense_history():
 
 @st.dialog('Delete an Expense Entry')
 def del_expense_entry():
-    index = st.number_input(
-        'Select Index to Edit',
+    index = st.slider(
+        'Select Index to Delete',
         min_value=0,
         max_value=len(expense_data) - 1,
     )
@@ -202,6 +202,8 @@ def del_expense_entry():
         save_expense_history('Delete', index=index)
         st.session_state.notification = 'Expense entry successfully deleted!'
         st.rerun()
+
+sort_expense_history(expense_data)
 
 st.subheader('Actions:')
 customization_buttons()
