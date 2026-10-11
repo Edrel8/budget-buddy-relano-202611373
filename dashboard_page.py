@@ -138,7 +138,7 @@ def display_budget_breakdown(budg_data, exp_data):
 
     for budg in budg_breakdown:
         if budg['remaining'] < 0:
-            st.warning('An expense exceeds budget.')
+            st.warning(f'{budg['category']} expenses exceeds its planned budget.')
 
 def highlight_row(row):
     if row['remaining'] < 0:
