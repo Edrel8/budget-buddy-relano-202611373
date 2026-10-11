@@ -121,11 +121,11 @@ def display_budget_breakdown(budg_data, exp_data):
         column_config={
             'category': 'Category',
             'planned': st.column_config.NumberColumn(
-                'Planned Amount',
+                'Planned Budget',
                 format=f'{PESO}'+'%.1f',
             ),
             'actual': st.column_config.NumberColumn(
-                'Actual Amount',
+                'Actual Expense',
                 format=f'{PESO}'+'%.1f',
             ),
             'remaining': st.column_config.NumberColumn(
@@ -179,7 +179,7 @@ def planned_and_actual_expenses_chart(budg_data, exp_data):
     budg_breakdown = calc_budget_breakdown(budg_data, exp_data)
 
     categories = [budg['category'] for budg in budg_breakdown]
-    planned_exp_data = [budg['planned'] for budg in budg_breakdown]
+    planned_budg_data = [budg['planned'] for budg in budg_breakdown]
     actual_exp_data = [budg['actual'] for budg in budg_breakdown]
 
     fig2, ax2 = plt.subplots()
@@ -195,7 +195,7 @@ def planned_and_actual_expenses_chart(budg_data, exp_data):
     ax2.set_ylabel(f'Amount (in {PESO})', fontsize=12, color='white')
 
     ax2.grouped_bar(
-        [planned_exp_data, actual_exp_data],
+        [planned_budg_data, actual_exp_data],
         tick_labels=categories,
         labels=['Planned', 'Actual'],
         edgecolor='white'
