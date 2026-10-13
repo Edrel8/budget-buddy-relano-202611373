@@ -5,7 +5,7 @@ import datetime
 st.title('Budget Planner')
 
 budget_data = dl.load_budget_data()
-PESO = '\u20B1'
+CURRENCY = st.session_state.currency
 MONTHS = [
     'January',
     'February',
@@ -63,15 +63,15 @@ def show_budget_data(budget_data):
         'category': 'Category',
         'planned_amount':st.column_config.NumberColumn(
             'Planned Expenses',
-            format=f'{PESO}'+'%.1f'
+            format=f'{CURRENCY}'+'%.1f'
         ),
         'unallocated': st.column_config.NumberColumn(
             'Unallocated Amount',
-            format=f'{PESO}'+'%.1f'
+            format=f'{CURRENCY}'+'%.1f'
         ),
         'exceeded': st.column_config.NumberColumn(
             'Exceeded Amount',
-            format=f'{PESO}'+'%.1f'
+            format=f'{CURRENCY}'+'%.1f'
         )
     }
     st.dataframe(budget_data, column_config=column_config)

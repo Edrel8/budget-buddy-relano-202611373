@@ -8,7 +8,7 @@ st.title('Dashboard')
 
 budget_data = dl.load_budget_data()
 expense_data = dl.load_expense_data()
-PESO = '\u20B1'
+CURRENCY = st.session_state.currency
 COLUMNS = {
     'category': 'Category',
     'planned': 'Planned Amount',
@@ -56,10 +56,10 @@ def display_month_summary(budg_data, exp_data):
     money_remaining = total_income - total_expenses
 
     month_summary = {
-        'Total Income': f'= {PESO}{total_income}',
-        'Total Planned Expenses': f'= {PESO}{total_planned_expenses}',
-        'Total Expenses': f'= {PESO}{total_expenses}',
-        'Money Remaining': f'= {PESO}{money_remaining}'
+        'Total Income': f'= {CURRENCY}{total_income}',
+        'Total Planned Expenses': f'= {CURRENCY}{total_planned_expenses}',
+        'Total Expenses': f'= {CURRENCY}{total_expenses}',
+        'Money Remaining': f'= {CURRENCY}{money_remaining}'
     }
 
     st.subheader('This Month\'s Summary', text_alignment='center')
@@ -123,15 +123,15 @@ def display_budget_breakdown(budg_data, exp_data):
             'category': 'Category',
             'planned': st.column_config.NumberColumn(
                 'Planned Budget',
-                format=f'{PESO}'+'%.1f',
+                format=f'{CURRENCY}'+'%.1f',
             ),
             'actual': st.column_config.NumberColumn(
                 'Actual Expense',
-                format=f'{PESO}'+'%.1f',
+                format=f'{CURRENCY}'+'%.1f',
             ),
             'remaining': st.column_config.NumberColumn(
                 'Money Remaining',
-                format=f'{PESO}'+'%.1f',
+                format=f'{CURRENCY}'+'%.1f',
             )
         },
         hide_index=True
@@ -168,7 +168,7 @@ def budget_categ_pie(budg_data):
         labels=categories,
         textprops={'color': 'gray'}
         )
-    ax1.pie_label(budg_pie, f'{PESO}'+"{absval:,.0f}")
+    ax1.pie_label(budg_pie, f'{CURRENCY}'+"{absval:,.0f}")
 
     st.pyplot(fig1)
 
@@ -185,7 +185,7 @@ def planned_and_actual_expenses_chart(budg_data, exp_data):
     fig2.patch.set_alpha(0.0)
     ax2.patch.set_alpha(0.0)
 
-    ax2.set_ylabel(f'Amount (in {PESO})', fontsize=12, color='gray')
+    ax2.set_ylabel(f'Amount (in {CURRENCY})', fontsize=12, color='gray')
 
     ax2.grouped_bar(
         [planned_budg_data, actual_exp_data],
@@ -236,7 +236,7 @@ def visualize_expense_history(exp_data):
         x='Day',
         y='Amount',
         x_label='Days of the Month',
-        y_label=f'Amount of Expenses (in {PESO})',
+        y_label=f'Amount of Expenses (in {CURRENCY})',
         color='red'
         )
 

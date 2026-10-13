@@ -6,7 +6,7 @@ st.title('Expenses')
 
 expense_data = dl.load_expense_data()
 BUDGET_DATA = dl.load_budget_data()
-PESO = '\u20B1'
+CURRENCY = st.session_state.currency
 
 if 'notification' in st.session_state:
     st.toast(st.session_state.notification)
@@ -34,7 +34,7 @@ def show_expense_data():
         'description': 'Description',
         'amount': st.column_config.NumberColumn(
             'Amount',
-            format=f'{PESO}'+'%.1f'
+            format=f'{CURRENCY}'+'%.1f'
         )
         }
     st.dataframe(expense_data, column_config=column_config, height='content')
