@@ -59,7 +59,7 @@ def display_month_summary(budg_data, exp_data):
         'Total Income': f'= {PESO}{total_income}',
         'Total Planned Expenses': f'= {PESO}{total_planned_expenses}',
         'Total Expenses': f'= {PESO}{total_expenses}',
-        'Money Remainig': f'= {PESO}{money_remaining}'
+        'Money Remaining': f'= {PESO}{money_remaining}'
     }
 
     st.subheader('This Month\'s Summary', text_alignment='center')
@@ -169,7 +169,7 @@ def budget_categ_pie(budg_data):
         textprops={'color': 'gray'}
         )
     ax1.pie_label(budg_pie, f'{PESO}'+"{absval:,.0f}")
-    
+
     st.pyplot(fig1)
 
 def planned_and_actual_expenses_chart(budg_data, exp_data):
@@ -213,7 +213,23 @@ def visualize_expense_history(exp_data):
             'Day': day,
             'Amount': amount
         }
-        expenses_per_day.append(day_expense)
+        for day_exp in expenses_per_day:
+            if day_exp['Day'] == day:
+                day_exp['Amount'] += amount
+                break
+        else:
+            expenses_per_day.append(day_expense)
+
+    if len(expenses_per_day) <= 0:
+        placeholder1 = {
+            'Day': 0,
+            'Amount': 0
+        }
+        placeholder2 = {
+            'Day': 1,
+            'Amount': 0
+        }
+        expenses_per_day.extend([placeholder1, placeholder2])
     
     st.line_chart(
         expenses_per_day,
