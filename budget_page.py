@@ -108,9 +108,12 @@ def show_budget_data(budg_data):
     column_config = {
         'month': 'Month',
         'income_source': 'Income Source',
-        'income': 'Income',
+        'income': st.column_config.NumberColumn(
+            'Income',
+            format=f'{CURRENCY}'+'%.1f'
+        ),
         'category': 'Category',
-        'planned_amount':st.column_config.NumberColumn(
+        'planned_amount': st.column_config.NumberColumn(
             'Planned Expenses',
             format=f'{CURRENCY}'+'%.1f'
         ),

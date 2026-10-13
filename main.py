@@ -17,12 +17,14 @@ def select_currency():
         'Peso (₱)': '₱'
     }
 
+    st.subheader('Select Currency to Use')
     currency = st.selectbox(
-        'Select Currency to Use',
+        'Select Currency',
         currency_names,
         index=4,
         key='currency1',
-        persist_state='session'
+        persist_state='session',
+        label_visibility='collapsed'
     )
 
     if st.button('Save Currency'):
