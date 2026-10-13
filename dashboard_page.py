@@ -146,6 +146,8 @@ def highlight_row(row):
     return [''] * len(row)
 
 def budget_categ_pie(budg_data):
+    st.subheader('Budget Distribution', text_alignment='center')
+    
     categ_amounts = {}
     for budg in budg_data:
         if budg['category'] not in categ_amounts:
@@ -158,24 +160,20 @@ def budget_categ_pie(budg_data):
     
     fig1, ax1 = plt.subplots()
     
-    ax1.set_title(
-        'Budget Distribution',
-        fontsize='14',
-        fontweight='bold',
-        color='white'
-        )
     fig1.patch.set_alpha(0.0)
     
     budg_pie = ax1.pie(
         amounts,
         labels=categories,
-        textprops={'color': 'white'}
+        textprops={'color': 'gray'}
         )
     ax1.pie_label(budg_pie, f'{PESO}'+"{absval:,.0f}")
     
     st.pyplot(fig1)
 
 def planned_and_actual_expenses_chart(budg_data, exp_data):
+    st.subheader('Planned vs. Actual Expenses', text_alignment='center')
+
     budg_breakdown = calc_budget_breakdown(budg_data, exp_data)
 
     categories = [budg['category'] for budg in budg_breakdown]
@@ -186,28 +184,23 @@ def planned_and_actual_expenses_chart(budg_data, exp_data):
     fig2.patch.set_alpha(0.0)
     ax2.patch.set_alpha(0.0)
 
-    ax2.set_title(
-            'Planned vs. Actual Expenses',
-            fontsize='14',
-            fontweight='bold',
-            color='white'
-            )
-    ax2.set_ylabel(f'Amount (in {PESO})', fontsize=12, color='white')
+    ax2.set_ylabel(f'Amount (in {PESO})', fontsize=12, color='gray')
 
     ax2.grouped_bar(
         [planned_budg_data, actual_exp_data],
         tick_labels=categories,
         labels=['Planned', 'Actual'],
-        edgecolor='white'
     )
 
     ax2.tick_params(axis='x', labelsize=7)
-    ax2.tick_params(axis='both', color='white', labelcolor='white')
+    ax2.tick_params(axis='both', color='gray', labelcolor='gray')
     for spine in ax2.spines.values():
-        spine.set_edgecolor('white')
+        spine.set_edgecolor('gray')
 
     ax2.legend()
     st.pyplot(fig2)
+
+
 
 select_month()
 filter_by_month()
