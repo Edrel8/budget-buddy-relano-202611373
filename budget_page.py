@@ -69,13 +69,13 @@ def show_budget_data(budget_data):
 def action_buttons():
     col1, col2, col3, col4 = st.columns([1,1,1,2])
     with col1:
-        if st.button('Add Budget'):
+        if st.button('Add Budget', type='primary'):
             add_budget_data()
     with col2:
-        if st.button('Edit Budget'):
+        if st.button('Edit Budget', type='primary'):
             edit_budget_data()
     with col3:
-        if st.button('Delete Budget'):
+        if st.button('Delete Budget', type='primary'):
             delete_budget_data()
 
 @st.dialog('Add Budget')

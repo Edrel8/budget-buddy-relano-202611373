@@ -38,13 +38,13 @@ def show_expense_data():
 def action_buttons():
     col1, col2, col3, col4 = st.columns([1,1,1,1])
     with col1:
-        if st.button('Add Expense Entry'):
+        if st.button('Add Expense Entry', type='primary'):
             add_expense_entry()
     with col2:
-        if st.button('Edit Expense Entry'):
+        if st.button('Edit Expense Entry', type='primary'):
             edit_expense_history()
     with col3:
-        if st.button('Delete Expense Entry'):
+        if st.button('Delete Expense Entry', type='primary'):
             del_expense_entry()
 
 @st.dialog('Add an Expense Entry')
