@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import data_loader as dl
 import pandas as pd
+import datetime as dt
 
 st.title('Dashboard')
 
@@ -200,7 +201,27 @@ def planned_and_actual_expenses_chart(budg_data, exp_data):
     ax2.legend()
     st.pyplot(fig2)
 
-
+def visualize_expense_history(exp_data):
+    st.subheader('Expense History', text_alignment='center')
+    
+    expenses_per_day = []
+    for exp in exp_data:
+        day = dt.date.strptime(exp['date'],'%Y-%m-%d').day
+        amount = exp['amount']
+        day_expense = {
+            'Day': day,
+            'Amount': amount
+        }
+        expenses_per_day.append(day_expense)
+    
+    st.line_chart(
+        expenses_per_day,
+        x='Day',
+        y='Amount',
+        x_label='Days of the Month',
+        y_label=f'Amount of Expenses (in {PESO})',
+        color='red'
+        )
 
 select_month()
 filter_by_month()
@@ -212,3 +233,5 @@ st.divider()
 budget_categ_pie(st.session_state.month_budget)
 st.divider()
 planned_and_actual_expenses_chart(st.session_state.month_budget, st.session_state.month_expense)
+st.divider()
+visualize_expense_history(st.session_state.month_expense)
