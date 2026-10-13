@@ -191,6 +191,7 @@ def planned_and_actual_expenses_chart(budg_data, exp_data):
         [planned_budg_data, actual_exp_data],
         tick_labels=categories,
         labels=['Planned', 'Actual'],
+        colors=["#1f57fe", "#ff411b"]
     )
 
     ax2.tick_params(axis='x', labelsize=7)
