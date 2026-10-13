@@ -45,6 +45,38 @@ def filter_by_income_source(income_source,*,budget_data=budget_data):
             filtered_data.append(budg)
     return filtered_data
 
+def merge_duplicate_categories():
+    duplicates = []
+    for budg1 in budget_data:
+        budg1_categ = {
+            'month': budg1['month'],
+            'income_source': budg1['income_source'],
+            'category': budg1['category']
+        }
+        for budg2 in budget_data:
+            budg2_categ = {
+                'month': budg2['month'],
+                'income_source': budg2['income_source'],
+                'category': budg2['category']
+            }
+            if budg1 == budg2: continue
+            elif budg2_categ == budg1_categ:
+                if (budg2, budg1) not in duplicates:
+                    duplicates.append((budg1, budg2))
+
+    for dupe1, dupe2 in duplicates:
+        merged_data = {
+            'month': dupe1['month'],
+            'income_source': dupe1['income_source'],
+            'income': dupe1['income'],
+            'category': dupe1['category'],
+            'planned_amount': dupe1['planned_amount'] + dupe2['planned_amount']
+        }
+        index = budget_data.index(dupe1)
+        budget_data.insert(index, merged_data)
+        budget_data.remove(dupe1)
+        budget_data.remove(dupe2)
+
 def save_budget(action, *, edit_start_i=None, edit_stop_i=None, delete_index=None):
     if action == 'Add':
         budget_data.extend(st.session_state.new_budget)
@@ -52,6 +84,7 @@ def save_budget(action, *, edit_start_i=None, edit_stop_i=None, delete_index=Non
         budget_data[edit_start_i: edit_stop_i + 1] = st.session_state.edited_budget
     elif action == 'Delete':
         budget_data.pop(delete_index)
+    merge_duplicate_categories()
     sort_budget_data(budget_data)
     dl.save_budget_data(budget_data)
 
