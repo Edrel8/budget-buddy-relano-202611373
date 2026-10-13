@@ -6,13 +6,7 @@ st.title('Expenses')
 
 expense_data = dl.load_expense_data()
 BUDGET_DATA = dl.load_budget_data()
-COLUMN_NAMES = {
-        'date':'Date',
-        'month':'Month',
-        'category':'Category',
-        'description':'Description',
-        'amount':'Amount'
-        }
+PESO = '\u20B1'
 
 if 'notification' in st.session_state:
     st.toast(st.session_state.notification)
@@ -33,7 +27,17 @@ def save_expense_history(action,*, index=None):
         dl.save_expense_data(expense_data)
 
 def show_expense_data():
-    st.dataframe(expense_data, column_config=COLUMN_NAMES, height='content')
+    column_config = {
+        'date': 'Date',
+        'month': 'Month',
+        'category': 'Category',
+        'description': 'Description',
+        'amount': st.column_config.NumberColumn(
+            'Amount',
+            format=f'{PESO}'+'%.1f'
+        )
+        }
+    st.dataframe(expense_data, column_config=column_config, height='content')
 
 def action_buttons():
     col1, col2, col3, col4 = st.columns([1,1,1,1])

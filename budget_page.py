@@ -5,15 +5,7 @@ import datetime
 st.title('Budget Planner')
 
 budget_data = dl.load_budget_data()
-COLUMN_NAMES = {
-        'month':'Month',
-        'income_source':'Income Source',
-        'income':'Income',
-        'category':'Category',
-        'planned_amount':'Planned Expenses',
-        'unallocated': 'Unallocated Amount',
-        'exceeded': 'Exceeded Amount'
-    }
+PESO = '\u20B1'
 MONTHS = [
     'January',
     'February',
@@ -64,7 +56,25 @@ def save_budget(action, *, edit_start_i=None, edit_stop_i=None, delete_index=Non
     dl.save_budget_data(budget_data)
 
 def show_budget_data(budget_data):
-    st.dataframe(budget_data, column_config=COLUMN_NAMES)
+    column_config = {
+        'month': 'Month',
+        'income_source': 'Income Source',
+        'income': 'Income',
+        'category': 'Category',
+        'planned_amount':st.column_config.NumberColumn(
+            'Planned Expenses',
+            format=f'{PESO}'+'%.1f'
+        ),
+        'unallocated': st.column_config.NumberColumn(
+            'Unallocated Amount',
+            format=f'{PESO}'+'%.1f'
+        ),
+        'exceeded': st.column_config.NumberColumn(
+            'Exceeded Amount',
+            format=f'{PESO}'+'%.1f'
+        )
+    }
+    st.dataframe(budget_data, column_config=column_config)
 
 def action_buttons():
     col1, col2, col3, col4 = st.columns([1,1,1,2])
