@@ -15,6 +15,20 @@ if 'notification' in st.session_state:
 def sort_expense_history(data):
     data.sort(key=lambda x: x['date'])
 
+def filter_by_time(type, time,*, exp_data=expense_data):
+    filtered_data = []
+    if type == 'Year':
+        for exp in exp_data:
+            exp_year = exp['month'].split()[1]
+            if (time == exp_year) and (exp not in filtered_data):
+                filtered_data.append(exp)
+    elif type == 'Month':
+        for exp in exp_data:
+            exp_month = exp['month']
+            if (time == exp_month) and (exp not in filtered_data):
+                filtered_data.append(exp)
+    return filtered_data
+
 def save_expense_history(action,*, index=None):
     sort_expense_history(expense_data)
     if action == 'Add':
@@ -26,7 +40,10 @@ def save_expense_history(action,*, index=None):
         expense_data.pop(index)
         dl.save_expense_data(expense_data)
 
-def show_expense_data():
+def show_expense_data(exp_data):
+    filter = st.session_state.selected_filter
+    if filter != 'All':
+        exp_data = filter_by_time(*filter)
     column_config = {
         'date': 'Date',
         'month': 'Month',
@@ -37,7 +54,7 @@ def show_expense_data():
             format=f'{CURRENCY}'+'%.1f'
         )
         }
-    st.dataframe(expense_data, column_config=column_config, height='content')
+    st.dataframe(exp_data, column_config=column_config, height='content')
 
 def action_buttons():
     col1, col2, col3, col4 = st.columns([1,1,1,1])
@@ -213,4 +230,4 @@ st.subheader('Actions:')
 action_buttons()
 
 st.subheader('Expense History')
-show_expense_data()
+show_expense_data(expense_data)

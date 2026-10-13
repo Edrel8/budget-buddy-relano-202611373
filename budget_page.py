@@ -38,6 +38,14 @@ def filter_by_month(month, year,*,budget_data=budget_data):
             filtered_data.append(budg)
     return filtered_data
 
+def filter_by_year(year,*,budget_data=budget_data):
+    filtered_data = []
+    for budg in budget_data:
+        budg_year = budg['month'].split()[1]
+        if (budg_year == year) and (budg not in filtered_data):
+            filtered_data.append(budg)
+    return filtered_data
+
 def filter_by_income_source(income_source,*,budget_data=budget_data):
     filtered_data = []
     for budg in budget_data:
@@ -88,7 +96,15 @@ def save_budget(action, *, edit_start_i=None, edit_stop_i=None, delete_index=Non
     sort_budget_data(budget_data)
     dl.save_budget_data(budget_data)
 
-def show_budget_data(budget_data):
+def show_budget_data(budg_data):
+    filter = st.session_state.selected_filter
+    if filter != 'All':
+        if filter[0] == 'Year':
+            budg_data = filter_by_year(filter[1], budget_data=budg_data)
+        elif filter[0] == 'Month':
+            month, year = filter[1].split()
+            budg_data = filter_by_month(month, year, budget_data=budg_data)
+    
     column_config = {
         'month': 'Month',
         'income_source': 'Income Source',
@@ -107,7 +123,7 @@ def show_budget_data(budget_data):
             format=f'{CURRENCY}'+'%.1f'
         )
     }
-    st.dataframe(budget_data, column_config=column_config)
+    st.dataframe(budg_data, column_config=column_config)
 
 def action_buttons():
     col1, col2, col3, col4 = st.columns([1,1,1,2])
