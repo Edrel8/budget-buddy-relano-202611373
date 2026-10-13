@@ -66,7 +66,7 @@ def save_budget(action, *, edit_start_i=None, edit_stop_i=None, delete_index=Non
 def show_budget_data(budget_data):
     st.dataframe(budget_data, column_config=COLUMN_NAMES)
 
-def customization_buttons():
+def action_buttons():
     col1, col2, col3, col4 = st.columns([1,1,1,2])
     with col1:
         if st.button('Add Budget'):
@@ -364,7 +364,7 @@ def check_exceed_planned_expenses():
         st.session_state.there_exceeds = False
 
 st.subheader('Actions:')
-customization_buttons()
+action_buttons()
 
 check_exceed_planned_expenses()
 

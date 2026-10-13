@@ -35,7 +35,7 @@ def save_expense_history(action,*, index=None):
 def show_expense_data():
     st.dataframe(expense_data, column_config=COLUMN_NAMES, height='content')
 
-def customization_buttons():
+def action_buttons():
     col1, col2, col3, col4 = st.columns([1,1,1,1])
     with col1:
         if st.button('Add Expense Entry'):
@@ -206,7 +206,7 @@ def del_expense_entry():
 sort_expense_history(expense_data)
 
 st.subheader('Actions:')
-customization_buttons()
+action_buttons()
 
 st.subheader('Expense History')
 show_expense_data()
