@@ -8,6 +8,9 @@ expense_page = st.Page('expense_page.py', title='Expense Tracker', url_path='exp
 pages = st.navigation([dashboard_page, budget_page, expense_page])
 
 def select_currency():
+    if 'currency' not in st.session_state:
+        st.session_state.currency = 'Peso (₱)'
+
     currency_names = ['Dollar ($)', 'Euro (€)', 'Yen/Yuan (¥)', 'Pound (£)', 'Peso (₱)']
     currencies = {
         'Dollar ($)': '$',
@@ -33,6 +36,9 @@ def select_currency():
 def filter_what_to_show():
     budget_data = dl.load_budget_data()
     st.subheader('Filter')
+
+    if 'selected_filter' not in st.session_state:
+        st.session_state.selected_filter = 'All'
     
     filters = ['Show All', 'Show Selected Year Only', 'Show Selected Month Only']
     filter = st.radio(
