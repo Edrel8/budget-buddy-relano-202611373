@@ -9,7 +9,7 @@ pages = st.navigation([dashboard_page, budget_page, expense_page])
 
 def select_currency():
     if 'currency' not in st.session_state:
-        st.session_state.currency = 'Peso (₱)'
+        st.session_state.currency = '₱'
 
     currency_names = ['Dollar ($)', 'Euro (€)', 'Yen/Yuan (¥)', 'Pound (£)', 'Peso (₱)']
     currencies = {

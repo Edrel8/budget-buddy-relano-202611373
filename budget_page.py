@@ -54,36 +54,51 @@ def filter_by_income_source(income_source,*,budget_data=budget_data):
     return filtered_data
 
 def merge_duplicate_categories():
-    duplicates = []
+    duplicates_index = []
     for budg1 in budget_data:
         budg1_categ = {
             'month': budg1['month'],
             'income_source': budg1['income_source'],
             'category': budg1['category']
         }
-        for budg2 in budget_data:
+        found_dupes = set()
+        for i, budg2 in enumerate(budget_data):
             budg2_categ = {
                 'month': budg2['month'],
                 'income_source': budg2['income_source'],
                 'category': budg2['category']
             }
-            if budg1 == budg2: continue
-            elif budg2_categ == budg1_categ:
-                if (budg2, budg1) not in duplicates:
-                    duplicates.append((budg1, budg2))
+            if budg2_categ == budg1_categ:
+                found_dupes.add(i)
+        if (len(found_dupes) > 1) and (found_dupes not in duplicates_index):
+            duplicates_index.append(found_dupes)
+    
+    duplicates = []
+    for dupes in duplicates_index:
+        duplicate_group = []
+        for index in dupes:
+            duplicate_group.append(budget_data[index])
+        duplicates.append(duplicate_group)
 
-    for dupe1, dupe2 in duplicates:
-        merged_data = {
-            'month': dupe1['month'],
-            'income_source': dupe1['income_source'],
-            'income': dupe1['income'],
-            'category': dupe1['category'],
-            'planned_amount': dupe1['planned_amount'] + dupe2['planned_amount']
+    merged_entries = []
+    for dupe_group in duplicates:
+        merged_entry = {
+            'month': dupe_group[0]['month'],
+            'income_source': dupe_group[0]['income_source'],
+            'income': dupe_group[0]['income'],
+            'category': dupe_group[0]['category'],
+            'planned_amount': 0
         }
-        index = budget_data.index(dupe1)
-        budget_data.insert(index, merged_data)
-        budget_data.remove(dupe1)
-        budget_data.remove(dupe2)
+        for dupe in dupe_group:
+            merged_entry['planned_amount'] += dupe['planned_amount']
+        merged_entries.append(merged_entry)
+
+    for entry in merged_entries:
+        budget_data.append(entry)
+    
+    for dupe_group in duplicates:
+        for dupe in dupe_group:
+            budget_data.remove(dupe)
 
 def save_budget(action, *, edit_start_i=None, edit_stop_i=None, delete_index=None):
     if action == 'Add':
@@ -256,7 +271,7 @@ def edit_budget_data():
             ),
             'income': st.column_config.NumberColumn(
                 'Income',
-                format='%.1f',
+                format=f'{CURRENCY}'+'%.1f',
                 min_value=0.0,
                 step=100.0,
                 required=True
@@ -267,7 +282,7 @@ def edit_budget_data():
             ),
             'planned_amount': st.column_config.NumberColumn(
                 'Planned Amount',
-                format='%.1f',
+                format=f'{CURRENCY}'+'%.1f',
                 min_value=0.0,
                 step=100.0,
                 required=True
