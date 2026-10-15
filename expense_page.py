@@ -224,10 +224,13 @@ def del_expense_entry():
         st.session_state.notification = 'Expense entry successfully deleted!'
         st.rerun()
 
-sort_expense_history(expense_data)
+def expense_page():
+    sort_expense_history(expense_data)
 
-st.subheader('Actions:')
-action_buttons()
+    st.subheader('Actions:')
+    action_buttons()
 
-st.subheader('Expense History')
-show_expense_data(expense_data)
+    st.subheader('Expense History')
+    show_expense_data(expense_data)
+
+expense_page()

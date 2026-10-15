@@ -440,18 +440,21 @@ def check_exceed_planned_expenses():
     else:
         st.session_state.there_exceeds = False
 
-st.subheader('Actions:')
-action_buttons()
+def budget_page():
+    st.subheader('Actions:')
+    action_buttons()
 
-check_exceed_planned_expenses()
+    check_exceed_planned_expenses()
 
-st.subheader('Allocated Budget')
-show_budget_data(budget_data)
+    st.subheader('Allocated Budget')
+    show_budget_data(budget_data)
 
-if st.session_state.there_exceeds:
-    st.subheader('Exceeded Planned Expenses')
-    show_budget_data(st.session_state.exceeded_planned_expenses)
+    if st.session_state.there_exceeds:
+        st.subheader('Exceeded Planned Expenses')
+        show_budget_data(st.session_state.exceeded_planned_expenses)
 
-st.subheader('Unallocated Budget')
-calc_unallocated_budget()
-show_budget_data(st.session_state.unallocated_budgets)
+    st.subheader('Unallocated Budget')
+    calc_unallocated_budget()
+    show_budget_data(st.session_state.unallocated_budgets)
+
+budget_page()

@@ -240,15 +240,18 @@ def visualize_expense_history(exp_data):
         color='red'
         )
 
-select_month()
-filter_by_month()
+def dashboard_page():
+    select_month()
+    filter_by_month()
 
-display_month_summary(st.session_state.month_budget, st.session_state.month_expense)
-st.divider()
-display_budget_breakdown(st.session_state.month_budget, st.session_state.month_expense)
-st.divider()
-budget_categ_pie(st.session_state.month_budget)
-st.divider()
-planned_and_actual_expenses_chart(st.session_state.month_budget, st.session_state.month_expense)
-st.divider()
-visualize_expense_history(st.session_state.month_expense)
+    display_month_summary(st.session_state.month_budget, st.session_state.month_expense)
+    st.divider()
+    display_budget_breakdown(st.session_state.month_budget, st.session_state.month_expense)
+    st.divider()
+    budget_categ_pie(st.session_state.month_budget)
+    st.divider()
+    planned_and_actual_expenses_chart(st.session_state.month_budget, st.session_state.month_expense)
+    st.divider()
+    visualize_expense_history(st.session_state.month_expense)
+
+dashboard_page()
