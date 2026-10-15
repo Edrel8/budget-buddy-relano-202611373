@@ -133,7 +133,7 @@ def edit_expense_history():
         disabled=True
         )
 
-    categories = list({budg['category'] for budg in BUDGET_DATA})
+    categories = list({exp['category'] for exp in expense_data})
     category = st.selectbox(
         'Select Category',
         categories,
@@ -188,7 +188,7 @@ def del_expense_entry():
         disabled=True
         )
 
-    categories = list({budg['category'] for budg in BUDGET_DATA})
+    categories = list({exp['category'] for exp in expense_data})
     category = st.selectbox(
         'Select Category',
         categories,
